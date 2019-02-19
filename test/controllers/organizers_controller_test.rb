@@ -17,6 +17,7 @@
      @organizer_ready = organizers(:utopicos)
      @mkt = organizers(:mkt)
      @guide_mkt_validated = organizers(:guide_mkt_validated)
+     @guidebook = guidebooks(:one)
      @organizer = {
        name: "Utópicos mundo afora",
        description: "uma agencia utopica",
@@ -27,6 +28,20 @@
        instagram: "a instagram",
        phone: "a phone",
        user_id: users(:alexandre).id
+     }
+
+     @organizer_with_user = {
+         name: "Utópicos mundo afora",
+         description: "uma agencia utopica",
+         email: "utopicos@gmail.com",
+         website: "http://website",
+         facebook: "a facebook",
+         twitter: "a twitter",
+         instagram: "a instagram",
+         phone: "a phone",
+         type_of_user: "organizer",
+         password: "1234",
+         password_confirmation: "1234"
      }
     
      @other_organizer = {
@@ -41,6 +56,7 @@
        mail_notification: false,
        user_id: users(:alexandre).id
      }
+
    end
    
    teardown do
@@ -69,6 +85,15 @@
    test "should create organizer basic" do
      assert_difference('Organizer.count') do
        post :create, organizer: @organizer
+     end
+     assert_not ActionMailer::Base.deliveries.empty?
+     assert_equal flash[:notice], "Sua conta como guia foi criada com sucesso"
+     assert_redirected_to organizer_path(assigns(:organizer))
+   end
+
+   test "should create organizer with user" do
+     assert_difference('Organizer.count') do
+       post :create, organizer: @organizer_with_user
      end
      assert_not ActionMailer::Base.deliveries.empty?
      assert_equal flash[:notice], "Sua conta como guia foi criada com sucesso"
@@ -178,7 +203,7 @@
    end
    
    test "should admin organizer" do
-     get :manage, id: @organizer_ready.id
+     get :manage_tours, id: @organizer_ready.id
      assert_response :success
    end
 
@@ -205,7 +230,7 @@
    test "should not admin organizer if is not the organizer owner and no admin" do
      sign_out users(:alexandre)
      sign_in users(:fulano)
-     get :manage, id: @organizer_ready.id
+     get :manage_tours, id: @organizer_ready.id
      assert_equal flash[:notice], "Você não está autorizado a entrar nesta página"
      assert_redirected_to new_user_session_path
    end
@@ -213,7 +238,7 @@
    test "should admin organizer if is the organizer owner" do
      sign_out users(:alexandre)
      sign_in users(:joana)
-     get :manage, id: @organizer_ready.id
+     get :manage_tours, id: @organizer_ready.id
      assert_response :success
    end
    
@@ -331,7 +356,7 @@
    end
    
    test "should load successfully the organizer manage" do
-     get :manage, id: @mkt.id
+     get :manage_tours, id: @mkt.id, guidebook: @guidebook.id
      assert_response :success
    end
 

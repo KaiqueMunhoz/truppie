@@ -11,10 +11,38 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180116235218) do
+ActiveRecord::Schema.define(version: 20180816142000) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "admin_pages", force: :cascade do |t|
+    t.string   "namespace"
+    t.string   "lang"
+    t.text     "body"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_index "admin_pages", ["namespace"], name: "index_admin_pages_on_namespace", using: :btree
+
+  create_table "admin_users", force: :cascade do |t|
+    t.string   "email",                  default: "", null: false
+    t.string   "encrypted_password",     default: "", null: false
+    t.string   "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.integer  "sign_in_count",          default: 0,  null: false
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.inet     "current_sign_in_ip"
+    t.inet     "last_sign_in_ip"
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
+  end
+
+  add_index "admin_users", ["email"], name: "index_admin_users_on_email", unique: true, using: :btree
+  add_index "admin_users", ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true, using: :btree
 
   create_table "attractions", force: :cascade do |t|
     t.string   "name"
@@ -249,6 +277,14 @@ ActiveRecord::Schema.define(version: 20180116235218) do
   add_index "guidebooks_packages", ["guidebook_id", "package_id"], name: "index_guidebooks_packages_on_guidebook_id_and_package_id", using: :btree
   add_index "guidebooks_packages", ["package_id", "guidebook_id"], name: "index_guidebooks_packages_on_package_id_and_guidebook_id", using: :btree
 
+  create_table "guidebooks_services", id: false, force: :cascade do |t|
+    t.integer "guidebook_id", null: false
+    t.integer "service_id",   null: false
+  end
+
+  add_index "guidebooks_services", ["guidebook_id", "service_id"], name: "index_guidebooks_services_on_guidebook_id_and_service_id", using: :btree
+  add_index "guidebooks_services", ["service_id", "guidebook_id"], name: "index_guidebooks_services_on_service_id_and_guidebook_id", using: :btree
+
   create_table "guidebooks_tags", id: false, force: :cascade do |t|
     t.integer "tag_id",       null: false
     t.integer "guidebook_id", null: false
@@ -427,11 +463,23 @@ ActiveRecord::Schema.define(version: 20180116235218) do
     t.string   "destination"
     t.string   "source"
     t.integer  "guidebook_id"
+    t.integer  "package_id"
+    t.integer  "service_id"
   end
 
   add_index "orders", ["guidebook_id"], name: "index_orders_on_guidebook_id", using: :btree
+  add_index "orders", ["package_id"], name: "index_orders_on_package_id", using: :btree
+  add_index "orders", ["service_id"], name: "index_orders_on_service_id", using: :btree
   add_index "orders", ["tour_id"], name: "index_orders_on_tour_id", using: :btree
   add_index "orders", ["user_id"], name: "index_orders_on_user_id", using: :btree
+
+  create_table "orders_services", id: false, force: :cascade do |t|
+    t.integer "order_id",   null: false
+    t.integer "service_id", null: false
+  end
+
+  add_index "orders_services", ["order_id", "service_id"], name: "index_orders_services_on_order_id_and_service_id", using: :btree
+  add_index "orders_services", ["service_id", "order_id"], name: "index_orders_services_on_service_id_and_order_id", using: :btree
 
   create_table "orders_tours", id: false, force: :cascade do |t|
     t.integer "tour_id",  null: false
@@ -567,9 +615,20 @@ ActiveRecord::Schema.define(version: 20180116235218) do
 
   create_table "services", force: :cascade do |t|
     t.string   "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
+    t.integer  "value"
+    t.text     "description"
+    t.text     "included",    default: [],              array: true
   end
+
+  create_table "services_tours", id: false, force: :cascade do |t|
+    t.integer "tour_id",    null: false
+    t.integer "service_id", null: false
+  end
+
+  add_index "services_tours", ["service_id", "tour_id"], name: "index_services_tours_on_service_id_and_tour_id", using: :btree
+  add_index "services_tours", ["tour_id", "service_id"], name: "index_services_tours_on_tour_id_and_service_id", using: :btree
 
   create_table "sessions", force: :cascade do |t|
     t.string   "session_id", null: false
@@ -689,6 +748,7 @@ ActiveRecord::Schema.define(version: 20180116235218) do
     t.string   "uid"
     t.string   "name"
     t.string   "image"
+    t.string   "type_of_user"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
@@ -732,6 +792,8 @@ ActiveRecord::Schema.define(version: 20180116235218) do
   add_foreign_key "marketplaces", "organizers"
   add_foreign_key "members", "users"
   add_foreign_key "orders", "guidebooks"
+  add_foreign_key "orders", "packages"
+  add_foreign_key "orders", "services"
   add_foreign_key "orders", "tours"
   add_foreign_key "organizers", "marketplaces"
   add_foreign_key "organizers", "members"

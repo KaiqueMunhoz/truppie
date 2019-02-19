@@ -47,7 +47,7 @@ module ApplicationHelper
   end
 
   def error_message_text(errors, error_field)
-    if !errors.nil? && errors.key?(error_field.to_s)
+    if !errors.nil? && (errors.key?(error_field.to_s) || errors.key?(error_field))
       raw "#{errors[error_field.to_s][0]}"
     else
       ''
@@ -69,12 +69,25 @@ module ApplicationHelper
     end
   end
 
-  def final_price(p)
+  def final_price(p, currency: 'brl')
+    choice = ''
     if p
-      return "<small>R$</small><span>#{p}</span>"
+      case currency
+      when 'usd'
+        choice = "<small>$</small><span>#{p}</span>"
+      when 'USD'
+        choice = "<small>$</small><span>#{p}</span>"
+      when 'AUD'
+        choice = "<small>$</small><span>#{p}</span>"
+      when 'brl'
+        choice = "<small>R$</small><span>#{p}</span>"
+      else
+        choice = "<small>R$</small><span>#{p}</span>"
+      end
     else
       "<small> não conseguimos obter o preço </span>"
     end
+    return choice
   end
 
   def final_price_from_cents(p)

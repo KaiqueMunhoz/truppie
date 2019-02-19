@@ -38,6 +38,7 @@ gem 'paperclip-aws'
 
 # Utilities
 gem 'redis'
+gem 'redis-session-store'
 gem 'bourbon', '4.3.4'
 gem 'rest-client'
 gem 'json'
@@ -51,6 +52,17 @@ gem 'time_diff'
 gem 'timecop'
 gem 'google_timezone'
 gem 'google_places'
+gem 'sitemap'
+
+# Admin and Depedences
+gem 'activeadmin'
+gem 'cancan'
+gem 'draper'
+gem 'pundit'
+gem 'active_admin_editor', github: 'ejholmes/active_admin_editor'
+
+#Mailchimp
+gem 'gibbon'
 
 group :production do
   gem 'rails_12factor'
@@ -59,7 +71,6 @@ end
 group :development, :test do
   gem 'cucumber-rails', :require => false
   gem 'selenium-webdriver'
-  gem 'chromedriver-helper'
   gem 'rspec'
   gem 'byebug'
   gem 'i18n-tasks', '~> 0.9.18'

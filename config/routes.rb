@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
 
+  devise_for :admin_users, ActiveAdmin::Devise.config
+  ActiveAdmin.routes(self)
   resources :forms
   resources :destinations
   resources :comments
@@ -28,6 +30,7 @@ Rails.application.routes.draw do
   resources :translations
 
   resources :packages
+  resources :services
 
   get 'tags/index'
   get 'languages/index'
@@ -59,7 +62,9 @@ Rails.application.routes.draw do
 
   resources :organizers do
     member do
-      get 'manage/(:tour)', to: 'organizers#manage', as: 'manage'
+      #get 'manage/tour/(:tour)', to: 'organizers#manage', as: 'manage'
+      get 'manage/tours/(:tour)', to: 'organizers#manage_tours', as: 'manage_tours'
+      get 'manage/guidebooks/(:guidebook)', to: 'organizers#manage_guidebooks', as: 'manage_guidebooks'
       get 'marketplace', to: 'organizers#marketplace', as: 'marketplace'
       get 'transfer', to: 'organizers#transfer', as: 'transfer'
       post 'transfer_funds', to: 'organizers#transfer_funds', as: 'transfer_funds'
@@ -73,13 +78,21 @@ Rails.application.routes.draw do
       get 'account_status', to: 'organizers#account_status', as: 'account_status'
       get 'confirm_account', to: 'organizers#confirm_account', as: 'confirm_account'
       get 'guided_tour', to: 'organizers#guided_tour', as: 'guided_tour'
+      get 'guidebooks', to: 'organizers#guidebooks', as: 'guidebooks'
       get 'schedule', to: 'organizers#schedule', as: 'schedule'
       get 'clients', to: 'organizers#clients', as: 'clients'
       get 'external_events', to: 'organizers#external_events', as: 'external_events'
       post 'import_events', to: 'organizers#import_events', as: 'import_events'
       get 'edit_guided_tour/(:tour)', to: 'organizers#edit_guided_tour', as: 'edit_guided_tour'
+      get 'edit_guidebook/(:guidebook)', to: 'organizers#edit_guidebook', as: 'edit_guidebook'
     end
   end
+
+  get 'tours/products', to: 'tours#products'
+  get 'tours/products/:id', to: 'tours#product', as: 'tour_product'
+  get 'tours/product_availability/:code', to: 'tours#product_availability'
+  post 'tours/confirm_product', to: 'tours#confirm_product'
+  post 'tours/confirm_product_booking', to: 'tours#confirm_product_booking'
 
   resources :tours do
     member do
@@ -95,9 +108,11 @@ Rails.application.routes.draw do
   resources :guidebooks do
     member do
       get 'confirm/(:packagename)', to: 'guidebooks#confirm', as: 'confirm'
+      get 'copy_guidebook', to: 'guidebooks#copy_guidebook', as: 'copy_guidebook'
       post 'confirm_presence'
       get 'confirm_presence_alt'
       post 'unconfirm_presence'
+      get 'manage/guidebook/(:guidebook)', to: 'organizers#guidebook', as: 'manage'
     end
   end
 
